@@ -26,4 +26,4 @@ VOLUME  ["/etc/postgresql", "/var/log/postgresql"]
 ADD run.sh /usr/local/bin/run
 RUN chmod 0755 /usr/local/bin/run
 
-CMD ["/usr/local/bin/run"]
+CMD ["/usr/local/bin/run", "init", "serve"]
