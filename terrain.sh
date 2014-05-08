@@ -3,6 +3,7 @@
 # if data is in D:/mapdata/work and source is in D:/src/map/ata, run within Docker linux with:
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+LIBDIR=$DIR/lib
 DATA=/media/sf_ddrive/mapdata/work
 
 if [ $(uname) != 'Linux' ]; then
@@ -16,15 +17,15 @@ PGDOCKER=ataz/postgis
 NAME=baranya
 BBOX=17.5,46.4,18.85,45.7
 
-#docker run -v /tmp:/tmp -v $DATA:/data -v $DIR:/src homme/gdal /src/terrain-sub.sh /data/srtm.tif /data/$NAME $BBOX
+rm $DATA/$NAME-contour.*
+docker run -v /tmp:/tmp -v $DATA:/data -v $LIBDIR:/src homme/gdal /src/terrain-sub.sh /data/srtm.tif /data/$NAME $BBOX
 
 mkdir -p $HOME/$NAME-pgdata
 
-docker inspect $NAME-pgis ||
-	docker run -d -P --name $NAME-pgis -v $HOME/$NAME-pgdata:/var/lib/postgresql ataz/postgis && sleep 2
+$LIBDIR/start-pgis-db.sh $NAME
 
-PGIS_IP=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' $NAME-pgis)
-echo "Postgres IP is $PGIS_IP"
+docker run --link $NAME-pgis:db ataz/postgis sh -c "echo 'DROP TABLE contourlines;' | psql-link"
 
-docker run -v $DATA:/data ataz/postgis sh -c "shp2pgsql /data/$NAME-contour $NAME.contour | PGPASSWORD=docker psql -h $PGIS_IP -p 5432 postgres docker"
+docker run --link $NAME-pgis:db -v $DATA:/data ataz/postgis sh -c "shp2pgsql -c -D -s EPSG:3857 /data/$NAME-contour contourlines | psql-link -q"
 
+echo "Finished. Postgres port is 5432"

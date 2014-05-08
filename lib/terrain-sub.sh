@@ -22,7 +22,7 @@ IFS=',' read -ra PROJWIN <<< "$BBOX"
 
 # crop and fix coordinate system
 gdal_translate -projwin ${PROJWIN[@]} $src $TMP/$BASE-crop.tif &&
-	gdalwarp -s_srs WGS84 -t_srs EPSG:3785 -r bilinear $TMP/${BASE}-crop.tif $TMP/${BASE}.tif &&
+	gdalwarp -s_srs WGS84 -t_srs EPSG:3857 -r bilinear $TMP/${BASE}-crop.tif $TMP/${BASE}.tif &&
 	rm $TMP/${BASE}-crop.tif
 
 # color relief
