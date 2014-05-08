@@ -17,6 +17,11 @@ RUN echo "host    all             all             0.0.0.0/0               md5" >
 RUN echo "listen_addresses = '*'" >> /etc/postgresql/9.3/main/postgresql.conf
 RUN echo "port = 5432" >> /etc/postgresql/9.3/main/postgresql.conf
 
+ENV PGSQL_DBNAME gis
+ENV PGSQL_CFG main
+ENV PGSQL_VER 9.3
+ENV PGIS_VER 2.1
+
 # Expose the PostgreSQL port
 EXPOSE 5432
 
@@ -24,6 +29,7 @@ EXPOSE 5432
 VOLUME  ["/etc/postgresql", "/var/log/postgresql"]
 
 ADD run.sh /usr/local/bin/run
-RUN chmod 0755 /usr/local/bin/run
+ADD psql-link.sh /usr/local/bin/psql-link
+RUN chmod 0755 /usr/local/bin/run /usr/local/bin/psql-link
 
 CMD ["/usr/local/bin/run", "init", "serve"]

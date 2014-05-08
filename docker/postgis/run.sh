@@ -1,16 +1,11 @@
 #!/bin/bash
 
-DBNAME=gis
-
-PGVER=9.3
-CONFIG=main
-
 ASPG="su postgres"
-DATADIR="/var/lib/postgresql/$PGVER/$CONFIG"
-CONFIGFILE="/etc/postgresql/$PGVER/$CONFIG/postgresql.conf"
-POSTGRES="/usr/lib/postgresql/$PGVER/bin/postgres"
-INITDB="/usr/lib/postgresql/$PGVER/bin/initdb"
-PGISCONTRIB="/usr/share/postgresql/$PGVER/contrib/postgis-2.1"
+DATADIR="/var/lib/postgresql/$PGSQL_VER/$PGSQL_CFG"
+CONFIGFILE="/etc/postgresql/$PGSQL_VER/$PGSQL_CFG/postgresql.conf"
+POSTGRES="/usr/lib/postgresql/$PGSQL_VER/bin/postgres"
+INITDB="/usr/lib/postgresql/$PGSQL_VER/bin/initdb"
+PGISCONTRIB="/usr/share/postgresql/$PGSQL_VER/contrib/$PGIS_VER"
 
 function init() {
 	# test if DATADIR is existent
@@ -36,16 +31,16 @@ CREATE USER docker WITH SUPERUSER PASSWORD 'docker';
 EOF
 
 	# Create the database
-	$ASPG sh -c "createdb -O docker $DBNAME"
+	$ASPG sh -c "createdb -O docker $PGSQL_DBNAME"
 
 	# Install the Postgis schema
-	$ASPG sh -c "psql -q -d $DBNAME -f $PGISCONTRIB/postgis.sql"
+	$ASPG sh -c "psql -q -d $PGSQL_DBNAME -f $PGISCONTRIB/postgis.sql"
 
 	# Enable ST_Transform() operations on geometries
-	$ASPG sh -c "psql -q -d $DBNAME -f $PGISCONTRIB/spatial_ref_sys.sql"
+	$ASPG sh -c "psql -q -d $PGSQL_DBNAME -f $PGISCONTRIB/spatial_ref_sys.sql"
 
 	# Set the correct table ownership
-	$ASPG sh -c "psql -q -d $DBNAME" <<EOF
+	$ASPG sh -c "psql -q -d $PGSQL_DBNAME" <<EOF
 ALTER TABLE geometry_columns OWNER TO "docker";
 ALTER TABLE spatial_ref_sys OWNER TO "docker";
 EOF
@@ -67,6 +62,15 @@ function serve() {
 	$ASPG sh -c "$POSTGRES -D $DATADIR -c config_file=$CONFIGFILE" &
 	PID=$!
 	wait
+}
+
+function help() {
+	cat <<EOF
+Available arguments for this "run" script:
+init      initialiase database in /var/lib/postgresql
+          (database: gis, superuser/password: docker/docker)
+serve     serve database in /var/lib/postgresql on port 5432
+EOF
 }
 
 for arg; do
