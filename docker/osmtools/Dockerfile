@@ -22,3 +22,5 @@ RUN cd /tmp/osm2pgsql && \
     ./configure && \
     make && make install
 
+# Install osmconvert
+RUN wget -O - http://m.m.i24.cc/osmconvert.c | cc -x c - -lz -O3 -o /usr/local/bin/osmconvert
