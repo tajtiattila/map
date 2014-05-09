@@ -1,12 +1,5 @@
 #!/bin/bash
 
-# ata
-#BBOX=10,42,29,51
-
-# baranya@hu
-#BBOX=17.5,45.7,18.85,46.4
-#BBOX=17.5,46.4,18.85,45.7
-
 src=$1
 pfx=$2
 BBOX=$3
@@ -18,10 +11,14 @@ if [[ "$pfx" == "" || "$src" == "" || "$BBOX" == "" ]]; then
 fi
 
 BASE=$(basename $pfx)
-IFS=',' read -ra PROJWIN <<< "$BBOX"
+
+# gdal_translate needs latitudes in the wrong order for some reason
+IFS=',' read -ra BBOXV <<< "$BBOX"
+PROJWIN="${BBOXV[0]} ${BBOXV[3]} ${BBOXV[2]} ${BBOXV[1]}"
+unset BBOXV
 
 # crop and fix coordinate system
-gdal_translate -projwin ${PROJWIN[@]} $src $TMP/$BASE-crop.tif &&
+gdal_translate -projwin $PROJWIN $src $TMP/$BASE-crop.tif &&
 	gdalwarp -s_srs WGS84 -t_srs EPSG:3857 -r bilinear $TMP/${BASE}-crop.tif $TMP/${BASE}.tif &&
 	rm $TMP/${BASE}-crop.tif
 
