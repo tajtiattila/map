@@ -1,8 +1,13 @@
 FROM ubuntu:12.04
 
-# original version from https://github.com/helmi03/docker-postgis - Helmi <helmi@tuxuri.com>
+# based on https://github.com/helmi03/docker-postgis from Helmi <helmi@tuxuri.com>
 
 MAINTAINER Attila Tajti <attila.tajti@gmail.com>
+
+# Set the locale. This affects the encoding of the Postgresql template
+# databases.
+ENV LANG C.UTF-8
+RUN update-locale LANG=C.UTF-8
 
 RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list
 RUN apt-get -y update
