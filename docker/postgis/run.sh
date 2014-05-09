@@ -5,7 +5,7 @@ DATADIR="/var/lib/postgresql/$PGSQL_VER/$PGSQL_CFG"
 CONFIGFILE="/etc/postgresql/$PGSQL_VER/$PGSQL_CFG/postgresql.conf"
 POSTGRES="/usr/lib/postgresql/$PGSQL_VER/bin/postgres"
 INITDB="/usr/lib/postgresql/$PGSQL_VER/bin/initdb"
-PGISCONTRIB="/usr/share/postgresql/$PGSQL_VER/contrib/$PGIS_VER"
+PGISCONTRIB="/usr/share/postgresql/$PGSQL_VER/contrib/postgis-$PGIS_VER"
 
 function init() {
 	# test if DATADIR is existent
